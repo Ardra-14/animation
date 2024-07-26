@@ -10,11 +10,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Activity> activities = [];
+  List<Widget> activitiesList = [];
+  GlobalKey<AnimatedListState>_listKey = GlobalKey<AnimatedListState>();
 
   @override
   void initState() {
-    activities = [
+    //_addActivity();
+
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      _addActivity();
+    });
+  }
+
+  void _addActivity(){
+    List<Activity> activities = [
       Activity(
           name: 'Hiking at Yosmite National Park',
           location: 'California, USA',
@@ -39,9 +49,13 @@ class _HomePageState extends State<HomePage> {
         price: 150,
       ),
     ];
-    super.initState();
+    activities.forEach((Activity activity){
+      activitiesList.add(buildCard(activity));
+      _listKey.currentState!.insertItem(activitiesList.length-1);
+    });
   }
 
+Tween<Offset> _offset  = Tween(begin: Offset(1, 0),end: Offset(0, 0));
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +71,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: 1),
+              curve: Curves.easeIn,
               builder:(context, double val, child) {
                 return Opacity(
                   opacity: val,
@@ -80,13 +95,16 @@ class _HomePageState extends State<HomePage> {
               height: 20,
             ),
             Flexible(
-              child: ListView.builder(
-                itemCount: activities.length,
-                itemBuilder: (context, index) {
-                  Activity activity = activities[index];
-                  return buildCard(activity);
-                },
-              ),
+              child: AnimatedList(
+                key: _listKey,
+                initialItemCount: activitiesList.length,
+                itemBuilder: (context, index, animation){
+                  return SlideTransition(
+                    position: animation.drive(_offset),
+                    child: activitiesList[index],
+                    );
+                }
+                ),
             ),
           ],
         ),

@@ -10,6 +10,8 @@ class Heart extends StatefulWidget {
 class _HeartState extends State<Heart> with SingleTickerProviderStateMixin {
   AnimationController? _controller;
   Animation<Color?>? _colorAnimation;
+  Animation<double?>? _sizeAnimation;
+  Animation<double>? _curve;
   bool isFav = false;
 
   @override
@@ -20,6 +22,21 @@ class _HeartState extends State<Heart> with SingleTickerProviderStateMixin {
       begin: Colors.grey[400],
       end: Colors.red,
     ).animate(_controller!);
+
+
+     _curve = CurvedAnimation(
+      parent: _controller!,
+       curve: Curves.slowMiddle
+       );
+
+    _sizeAnimation = TweenSequence(
+      <TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(tween: Tween(begin: 30, end: 50), weight:50),
+      TweenSequenceItem<double>(tween: Tween(begin: 30, end: 50), weight:50),
+    ]).animate(_curve!);
+
+   
+
     // _controller!.forward();
 
     _controller!.addListener(() {
@@ -58,7 +75,8 @@ class _HeartState extends State<Heart> with SingleTickerProviderStateMixin {
           },
           icon: Icon(
             Icons.favorite,
-            size: 30,
+            // size: 30,
+            size: _sizeAnimation!.value,
             color: _colorAnimation!.value,
           ),
         );
